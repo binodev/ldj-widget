@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test LDJ Widget</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1E2B59;
+            margin-bottom: 10px;
+        }
+        .info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #1E2B59;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test du Widget LDJ</h1>
+        <p>Cette page teste l'intégration du widget juridique.</p>
+        
+        <div class="info">
+            <strong>📌 Le widget devrait :</strong>
+            <ul>
+                <li>Afficher un bouton en bas à droite de la page</li>
+                <li>Le bouton doit être cliquable</li>
+                <li>Au clic, afficher une alerte (placeholder pour le moment)</li>
+            </ul>
+        </div>
+
+        <p>Si vous voyez le bouton <code>"Assistance juridique"</code> en bas à droite, le widget fonctionne ! 🎉</p>
+    </div>
+
+    <!-- Chargement du widget -->
+    <script src="./dist/widgets/sdk.js"></script>
+    
+    <!-- Initialisation du widget -->
+    <script>
+        LDJWidget.init({
+            apiKey: 'test-api-key-123',
+            apiUrl: 'https://api.ledevisjuridique.fr/api/v1',
+            services: ['appointment', 'documents', 'ai_chat'],
+            theme: {
+                buttonText: 'Assistance juridique',
+                primaryColor: '#1E2B59'
+            }
+        });
+        
+        console.log('✅ LDJWidget initialisé avec succès', LDJWidget.config);
+    </script>
+</body>
+</html>
+
