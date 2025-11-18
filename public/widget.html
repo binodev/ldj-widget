@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Devis Juridique - Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        body[data-theme="dark"] {
+            background: #1a1a1a;
+            color: #f5f5f5;
+        }
+
+        .widget-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .widget-header {
+            background: #1E2B59;
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        body[data-theme="dark"] .widget-header {
+            background: #2a3a5c;
+        }
+
+        .widget-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .widget-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .widget-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .widget-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .widget-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+        }
+
+        .widget-error {
+            padding: 20px;
+            background: #fee;
+            color: #c33;
+            border-radius: 8px;
+            margin: 20px;
+        }
+
+        body[data-theme="dark"] .widget-error {
+            background: #3a2222;
+            color: #ff6b6b;
+        }
+
+        .service-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e5e5;
+            overflow-x: auto;
+        }
+
+        body[data-theme="dark"] .service-tabs {
+            border-bottom-color: #333;
+        }
+
+        .service-tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        body[data-theme="dark"] .service-tab {
+            color: #999;
+        }
+
+        .service-tab:hover {
+            color: #1E2B59;
+        }
+
+        body[data-theme="dark"] .service-tab:hover {
+            color: #5a8fff;
+        }
+
+        .service-tab.active {
+            color: #1E2B59;
+            border-bottom-color: #1E2B59;
+        }
+
+        body[data-theme="dark"] .service-tab.active {
+            color: #5a8fff;
+            border-bottom-color: #5a8fff;
+        }
+
+        .service-content {
+            display: none;
+        }
+
+        .service-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        body[data-theme="dark"] .form-label {
+            color: #e5e5e5;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            color: #1a1a1a;
+        }
+
+        body[data-theme="dark"] .form-input,
+        body[data-theme="dark"] .form-textarea,
+        body[data-theme="dark"] .form-select {
+            background: #2a2a2a;
+            border-color: #444;
+            color: #f5f5f5;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1E2B59;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #152041;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        body[data-theme="dark"] .btn-secondary {
+            background: #333;
+            color: #f5f5f5;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        body[data-theme="dark"] .chat-container {
+            border-color: #444;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        body[data-theme="dark"] .chat-messages {
+            background: #222;
+        }
+
+        .chat-message {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+
+        .chat-message.user {
+            background: #1E2B59;
+            color: white;
+            margin-left: auto;
+        }
+
+        .chat-message.assistant {
+            background: white;
+            color: #333;
+            border: 1px solid #e5e5e5;
+        }
+
+        body[data-theme="dark"] .chat-message.assistant {
+            background: #2a2a2a;
+            color: #f5f5f5;
+            border-color: #444;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            background: white;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        body[data-theme="dark"] .chat-input-container {
+            background: #2a2a2a;
+            border-top-color: #444;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        body[data-theme="dark"] .chat-input {
+            background: #1a1a1a;
+            border-color: #444;
+            color: #f5f5f5;
+        }
+
+        .success-message {
+            padding: 16px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        body[data-theme="dark"] .success-message {
+            background: #1a3a2a;
+            color: #4ade80;
+        }
+
+        .error-message {
+            padding: 16px;
+            background: #f8d7da;
+            color: #721c24;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        body[data-theme="dark"] .error-message {
+            background: #3a2222;
+            color: #ff6b6b;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1E2B59;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .widget-content {
+                padding: 12px;
+            }
+
+            .service-tabs {
+                gap: 4px;
+            }
+
+            .service-tab {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="widget-container">
+        <div class="widget-header">
+            <div class="widget-title">Le Devis Juridique</div>
+            <button class="widget-close" onclick="closeWidget()" aria-label="Fermer">×</button>
+        </div>
+
+        <div class="widget-content" id="widgetContent">
+            <div class="widget-loading">
+                <div class="spinner"></div>
+                <p>Chargement...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Récupérer les paramètres URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const partnerId = urlParams.get('partner');
+        const configId = urlParams.get('config');
+        const theme = urlParams.get('theme') || 'light';
+
+        // Configurer le thème
+        document.body.setAttribute('data-theme', theme);
+
+        // URL de l'API backend
+        const API_BASE_URL = window.location.origin.includes('localhost') 
+            ? 'http://localhost:5001' 
+            : 'https://api.ledevisjuridique.fr';
+
+        let widgetConfig = null;
+        let currentService = null;
+        let chatSessionId = null;
+
+        // Fonction pour fermer le widget
+        function closeWidget() {
+            if (window.parent) {
+                window.parent.postMessage({ type: 'ldj_widget_close' }, '*');
+            }
+        }
+
+        // Fonction pour récupérer la configuration du widget
+        async function loadWidgetConfig() {
+            try {
+                // Pour l'instant, on utilise les paramètres URL
+                // Si besoin d'un endpoint public, on pourra l'ajouter plus tard
+                widgetConfig = {
+                    partnerId: partnerId,
+                    configId: configId,
+                    theme: theme,
+                    // Services par défaut si non spécifiés
+                    enabledServices: ['appointment', 'litigation', 'documents', 'ai_chat']
+                };
+
+                // Appeler un endpoint public pour récupérer la config complète si disponible
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/api-widget/public/configs/${configId}?partner=${partnerId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.data) {
+                            widgetConfig = {
+                                ...widgetConfig,
+                                ...data.data,
+                                enabledServices: data.data.enabledServices || widgetConfig.enabledServices
+                            };
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Impossible de récupérer la config complète, utilisation des paramètres URL', e);
+                }
+
+                renderWidget();
+            } catch (error) {
+                console.error('Erreur lors du chargement de la config:', error);
+                showError('Erreur lors du chargement de la configuration du widget.');
+            }
+        }
+
+        // Fonction pour rendre le widget
+        function renderWidget() {
+            const content = document.getElementById('widgetContent');
+            
+            if (!widgetConfig || !widgetConfig.enabledServices || widgetConfig.enabledServices.length === 0) {
+                content.innerHTML = '<div class="widget-error">Aucun service disponible pour ce widget.</div>';
+                return;
+            }
+
+            const services = widgetConfig.enabledServices.map(s => typeof s === 'object' ? s.service : s);
+            
+            let tabsHTML = '<div class="service-tabs">';
+            let contentHTML = '';
+
+            if (services.includes('appointment')) {
+                tabsHTML += '<button class="service-tab active" onclick="switchService(\'appointment\')">📅 Rendez-vous</button>';
+                contentHTML += renderAppointmentForm();
+            }
+            if (services.includes('litigation')) {
+                tabsHTML += '<button class="service-tab' + (currentService === null ? (services[0] !== 'appointment' ? ' active' : '') : '') + '" onclick="switchService(\'litigation\')">⚖️ Litiges</button>';
+                contentHTML += renderLitigationForm();
+            }
+            if (services.includes('documents')) {
+                tabsHTML += '<button class="service-tab" onclick="switchService(\'documents\')">📄 Documents</button>';
+                contentHTML += renderDocumentForm();
+            }
+            if (services.includes('ai_chat')) {
+                tabsHTML += '<button class="service-tab" onclick="switchService(\'ai_chat\')">💬 Chat IA</button>';
+                contentHTML += renderChatInterface();
+            }
+
+            tabsHTML += '</div>';
+
+            content.innerHTML = tabsHTML + contentHTML;
+            
+            // Activer le premier service
+            if (currentService === null) {
+                const firstService = services[0];
+                switchService(firstService);
+            } else {
+                switchService(currentService);
+            }
+        }
+
+        // Fonction pour changer de service
+        function switchService(service) {
+            currentService = service;
+            
+            // Mettre à jour les onglets
+            document.querySelectorAll('.service-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.toLowerCase().includes(service)) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Mettre à jour le contenu
+            document.querySelectorAll('.service-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const serviceContent = document.getElementById(`service-${service}`);
+            if (serviceContent) {
+                serviceContent.classList.add('active');
+            }
+        }
+
+        // Formulaire de rendez-vous
+        function renderAppointmentForm() {
+            return `
+                <div class="service-content" id="service-appointment">
+                    <h2 style="margin-bottom: 20px;">Prendre un rendez-vous</h2>
+                    <form id="appointmentForm" onsubmit="handleAppointmentSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">Votre nom</label>
+                            <input type="text" class="form-input" name="clientName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" name="clientEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Téléphone</label>
+                            <input type="tel" class="form-input" name="clientPhone">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sujet de consultation</label>
+                            <textarea class="form-textarea" name="subject" required placeholder="Décrivez votre demande..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Type de consultation</label>
+                            <select class="form-select" name="consultationType" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option value="PHYSICAL">En présentiel</option>
+                                <option value="PHONE">Par téléphone</option>
+                                <option value="ZOOM">Visioconférence</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Demander un rendez-vous</button>
+                    </form>
+                    <div id="appointmentResult"></div>
+                </div>
+            `;
+        }
+
+        // Formulaire de litige
+        function renderLitigationForm() {
+            return `
+                <div class="service-content" id="service-litigation">
+                    <h2 style="margin-bottom: 20px;">Créer un litige</h2>
+                    <form id="litigationForm" onsubmit="handleLitigationSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">Votre nom</label>
+                            <input type="text" class="form-input" name="claimantName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" name="claimantEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description du litige</label>
+                            <textarea class="form-textarea" name="description" required placeholder="Décrivez votre litige en détail..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Montant réclamé (€)</label>
+                            <input type="number" class="form-input" name="amount" step="0.01" min="0">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Créer le litige</button>
+                    </form>
+                    <div id="litigationResult"></div>
+                </div>
+            `;
+        }
+
+        // Formulaire de document
+        function renderDocumentForm() {
+            return `
+                <div class="service-content" id="service-documents">
+                    <h2 style="margin-bottom: 20px;">Générer un document</h2>
+                    <form id="documentForm" onsubmit="handleDocumentSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">Type de document</label>
+                            <select class="form-select" name="documentType" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option value="MISE_EN_DEMEURE">Mise en demeure</option>
+                                <option value="RESILIATION">Résiliation</option>
+                                <option value="RECLAMATION">Réclamation</option>
+                                <option value="PROCURATION">Procuration</option>
+                                <option value="DOCUMENT_LIBRE">Document libre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Votre nom</label>
+                            <input type="text" class="form-input" name="clientName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" name="clientEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contexte / Situation</label>
+                            <textarea class="form-textarea" name="context" required placeholder="Décrivez la situation pour générer le document..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Générer le document</button>
+                    </form>
+                    <div id="documentResult"></div>
+                </div>
+            `;
+        }
+
+        // Interface de chat IA
+        function renderChatInterface() {
+            return `
+                <div class="service-content active" id="service-ai_chat">
+                    <h2 style="margin-bottom: 20px;">Assistant juridique IA</h2>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-message assistant">
+                                <p>Bonjour ! Je suis votre assistant juridique. Comment puis-je vous aider aujourd'hui ?</p>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <input type="text" class="chat-input" id="chatInput" placeholder="Posez votre question..." onkeypress="handleChatKeyPress(event)">
+                            <button class="btn btn-primary" onclick="sendChatMessage()">Envoyer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Gestionnaire de soumission de rendez-vous
+        async function handleAppointmentSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const resultDiv = document.getElementById('appointmentResult');
+            
+            resultDiv.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/api-widget/appointment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        clientName: formData.get('clientName'),
+                        clientEmail: formData.get('clientEmail'),
+                        clientPhone: formData.get('clientPhone'),
+                        subject: formData.get('subject'),
+                        consultationType: formData.get('consultationType'),
+                        preferredDate: null,
+                        notes: formData.get('subject')
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = '<div class="success-message">Votre demande de rendez-vous a été envoyée avec succès ! Un avocat vous contactera bientôt.</div>';
+                    event.target.reset();
+                } else {
+                    resultDiv.innerHTML = `<div class="error-message">Erreur : ${data.message || 'Une erreur est survenue'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error-message">Erreur : ${error.message}</div>`;
+            }
+        }
+
+        // Gestionnaire de soumission de litige
+        async function handleLitigationSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const resultDiv = document.getElementById('litigationResult');
+            
+            resultDiv.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/api-widget/litigation`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        claimantName: formData.get('claimantName'),
+                        claimantEmail: formData.get('claimantEmail'),
+                        description: formData.get('description'),
+                        amount: parseFloat(formData.get('amount')) || 0
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = '<div class="success-message">Votre litige a été créé avec succès ! Vous recevrez un suivi par email.</div>';
+                    event.target.reset();
+                } else {
+                    resultDiv.innerHTML = `<div class="error-message">Erreur : ${data.message || 'Une erreur est survenue'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error-message">Erreur : ${error.message}</div>`;
+            }
+        }
+
+        // Gestionnaire de soumission de document
+        async function handleDocumentSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const resultDiv = document.getElementById('documentResult');
+            
+            resultDiv.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/api-widget/documents`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        documentType: formData.get('documentType'),
+                        clientName: formData.get('clientName'),
+                        clientEmail: formData.get('clientEmail'),
+                        documentDetails: {
+                            context: formData.get('context')
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = '<div class="success-message">Votre document est en cours de génération. Vous recevrez un email avec le document une fois prêt.</div>';
+                    event.target.reset();
+                } else {
+                    resultDiv.innerHTML = `<div class="error-message">Erreur : ${data.message || 'Une erreur est survenue'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error-message">Erreur : ${error.message}</div>`;
+            }
+        }
+
+        // Gestionnaire de chat
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            const messagesDiv = document.getElementById('chatMessages');
+            
+            // Afficher le message de l'utilisateur
+            messagesDiv.innerHTML += `
+                <div class="chat-message user">
+                    <p>${escapeHtml(message)}</p>
+                </div>
+            `;
+
+            input.value = '';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // Afficher un indicateur de chargement
+            const loadingId = 'loading-' + Date.now();
+            messagesDiv.innerHTML += `
+                <div class="chat-message assistant" id="${loadingId}">
+                    <p>En réfléchissant...</p>
+                </div>
+            `;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            try {
+                const requestBody = {
+                    query: message,
+                    context: null
+                };
+
+                if (chatSessionId) {
+                    requestBody.sessionId = chatSessionId;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/api/api-widget/ai_chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                // Supprimer l'indicateur de chargement
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) {
+                    loadingEl.remove();
+                }
+
+                if (data.success) {
+                    // Stocker le sessionId pour la conversation continue
+                    if (data.data && data.data.sessionId) {
+                        chatSessionId = data.data.sessionId;
+                    }
+
+                    const responseText = data.data?.response || data.message || 'Je suis désolé, je n\'ai pas pu générer de réponse.';
+                    
+                    messagesDiv.innerHTML += `
+                        <div class="chat-message assistant">
+                            <p>${escapeHtml(responseText)}</p>
+                        </div>
+                    `;
+                } else {
+                    messagesDiv.innerHTML += `
+                        <div class="chat-message assistant">
+                            <p>Erreur : ${escapeHtml(data.message || 'Une erreur est survenue')}</p>
+                        </div>
+                    `;
+                }
+
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } catch (error) {
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) {
+                    loadingEl.remove();
+                }
+
+                messagesDiv.innerHTML += `
+                    <div class="chat-message assistant">
+                        <p>Erreur : ${escapeHtml(error.message)}</p>
+                    </div>
+                `;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Charger la configuration au chargement de la page
+        loadWidgetConfig();
+    </script>
+</body>
+</html>
+
