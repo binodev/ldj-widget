@@ -855,19 +855,19 @@
             let contentHTML = '';
 
             if (services.includes('appointment')) {
-                tabsHTML += '<button class="service-tab active" onclick="switchService(\'appointment\')">📅 Rendez-vous</button>';
+                tabsHTML += '<button class="service-tab" data-service="appointment" onclick="switchService(\'appointment\')">📅 Rendez-vous</button>';
                 contentHTML += renderAppointmentForm();
             }
             if (services.includes('litigation')) {
-                tabsHTML += '<button class="service-tab' + (currentService === null ? (services[0] !== 'appointment' ? ' active' : '') : '') + '" onclick="switchService(\'litigation\')">⚖️ Litiges</button>';
+                tabsHTML += '<button class="service-tab" data-service="litigation" onclick="switchService(\'litigation\')">⚖️ Litiges</button>';
                 contentHTML += renderLitigationForm();
             }
             if (services.includes('documents')) {
-                tabsHTML += '<button class="service-tab" onclick="switchService(\'documents\')">📄 Documents</button>';
+                tabsHTML += '<button class="service-tab" data-service="documents" onclick="switchService(\'documents\')">📄 Documents</button>';
                 contentHTML += renderDocumentForm();
             }
             if (services.includes('ai_chat')) {
-                tabsHTML += '<button class="service-tab" onclick="switchService(\'ai_chat\')">💬 Chat IA</button>';
+                tabsHTML += '<button class="service-tab" data-service="ai_chat" onclick="switchService(\'ai_chat\')">💬 Chat IA</button>';
                 contentHTML += renderChatInterface();
             }
 
@@ -891,7 +891,8 @@
             // Mettre à jour les onglets
             document.querySelectorAll('.service-tab').forEach(tab => {
                 tab.classList.remove('active');
-                if (tab.textContent.toLowerCase().includes(service)) {
+                // Utiliser l'attribut data-service pour une identification fiable
+                if (tab.getAttribute('data-service') === service) {
                     tab.classList.add('active');
                 }
             });
