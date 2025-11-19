@@ -484,7 +484,14 @@
 
                 // Appeler un endpoint public pour récupérer la config complète si disponible
                 try {
-                    const response = await fetch(`${API_BASE_URL}/api/api-widget/public/configs/${configId}?partner=${partnerId}`);
+                    const response = await fetch(`${API_BASE_URL}/api/api-widget/public/configs/${configId}?partner=${partnerId}`, {
+                        method: 'GET',
+                        mode: 'cors',
+                        credentials: 'omit',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success && data.data) {
@@ -496,7 +503,12 @@
                         }
                     }
                 } catch (e) {
-                    console.warn('Impossible de récupérer la config complète, utilisation des paramètres URL', e);
+                    // ERR_BLOCKED_BY_CLIENT est souvent causé par un bloqueur de navigateur/extension
+                    if (e.name === 'TypeError' && e.message.includes('Failed to fetch')) {
+                        console.warn('La requête a été bloquée (peut-être par une extension de navigateur). Utilisation des paramètres URL par défaut.');
+                    } else {
+                        console.warn('Impossible de récupérer la config complète, utilisation des paramètres URL', e);
+                    }
                 }
 
                 renderWidget();
@@ -707,6 +719,8 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/api-widget/public/appointment?partner=${partnerId}&config=${configId}`, {
                     method: 'POST',
+                    mode: 'cors',
+                    credentials: 'omit',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -730,7 +744,11 @@
                     resultDiv.innerHTML = `<div class="error-message">Erreur : ${data.message || 'Une erreur est survenue'}</div>`;
                 }
             } catch (error) {
-                resultDiv.innerHTML = `<div class="error-message">Erreur : ${error.message}</div>`;
+                let errorMessage = error.message || 'Une erreur est survenue';
+                if (error.message && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'La requête a été bloquée. Veuillez vérifier vos extensions de navigateur (bloqueurs de publicité) ou votre connexion réseau.';
+                }
+                resultDiv.innerHTML = `<div class="error-message">Erreur : ${errorMessage}</div>`;
             }
         }
 
@@ -745,6 +763,8 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/api-widget/public/litigation?partner=${partnerId}&config=${configId}`, {
                     method: 'POST',
+                    mode: 'cors',
+                    credentials: 'omit',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -765,7 +785,11 @@
                     resultDiv.innerHTML = `<div class="error-message">Erreur : ${data.message || 'Une erreur est survenue'}</div>`;
                 }
             } catch (error) {
-                resultDiv.innerHTML = `<div class="error-message">Erreur : ${error.message}</div>`;
+                let errorMessage = error.message || 'Une erreur est survenue';
+                if (error.message && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'La requête a été bloquée. Veuillez vérifier vos extensions de navigateur (bloqueurs de publicité) ou votre connexion réseau.';
+                }
+                resultDiv.innerHTML = `<div class="error-message">Erreur : ${errorMessage}</div>`;
             }
         }
 
@@ -780,6 +804,8 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/api-widget/public/documents?partner=${partnerId}&config=${configId}`, {
                     method: 'POST',
+                    mode: 'cors',
+                    credentials: 'omit',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -800,7 +826,11 @@
                     resultDiv.innerHTML = `<div class="error-message">Erreur : ${data.message || 'Une erreur est survenue'}</div>`;
                 }
             } catch (error) {
-                resultDiv.innerHTML = `<div class="error-message">Erreur : ${error.message}</div>`;
+                let errorMessage = error.message || 'Une erreur est survenue';
+                if (error.message && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'La requête a été bloquée. Veuillez vérifier vos extensions de navigateur (bloqueurs de publicité) ou votre connexion réseau.';
+                }
+                resultDiv.innerHTML = `<div class="error-message">Erreur : ${errorMessage}</div>`;
             }
         }
 
@@ -850,6 +880,8 @@
 
                 const response = await fetch(`${API_BASE_URL}/api/api-widget/public/ai_chat?partner=${partnerId}&config=${configId}`, {
                     method: 'POST',
+                    mode: 'cors',
+                    credentials: 'omit',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -892,9 +924,14 @@
                     loadingEl.remove();
                 }
 
+                let errorMessage = error.message || 'Une erreur est survenue';
+                if (error.message && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'La requête a été bloquée. Veuillez vérifier vos extensions de navigateur (bloqueurs de publicité) ou votre connexion réseau.';
+                }
+
                 messagesDiv.innerHTML += `
                     <div class="chat-message assistant">
-                        <p>Erreur : ${escapeHtml(error.message)}</p>
+                        <p>Erreur : ${escapeHtml(errorMessage)}</p>
                     </div>
                 `;
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
