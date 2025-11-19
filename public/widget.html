@@ -424,14 +424,39 @@
         const partnerId = urlParams.get('partner');
         const configId = urlParams.get('config');
         const theme = urlParams.get('theme') || 'light';
+        const apiUrl = urlParams.get('api_url'); // Paramètre optionnel pour l'URL de l'API
 
         // Configurer le thème
         document.body.setAttribute('data-theme', theme);
 
         // URL de l'API backend
-        const API_BASE_URL = window.location.origin.includes('localhost') 
-            ? 'http://localhost:5001' 
-            : 'https://api.ledevisjuridique.fr';
+        // Priorité: 1. Paramètre URL api_url, 2. Détection depuis parent (iframe), 3. Valeur par défaut
+        let API_BASE_URL = 'https://api.ledevisjuridique.fr';
+        
+        if (apiUrl) {
+            // Utiliser le paramètre URL si fourni
+            API_BASE_URL = apiUrl;
+        } else {
+            // Essayer de détecter depuis le parent si on est dans un iframe
+            try {
+                if (window.parent && window.parent !== window) {
+                    const parentOrigin = window.parent.location.origin;
+                    if (parentOrigin.includes('localhost') || parentOrigin.includes('127.0.0.1')) {
+                        // Extraire le port du parent s'il est présent, sinon utiliser 5001 par défaut
+                        const parentPort = window.parent.location.port || '5001';
+                        API_BASE_URL = `${window.parent.location.protocol}//${window.parent.location.hostname}:${parentPort}`;
+                    }
+                }
+            } catch (e) {
+                // Erreur CORS lors de l'accès à window.parent.location, utiliser la valeur par défaut
+                console.warn('Impossible d\'accéder à window.parent.location:', e);
+            }
+            
+            // Si toujours la valeur par défaut et qu'on est sur localhost, utiliser localhost:5001
+            if (window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')) {
+                API_BASE_URL = 'http://localhost:5001';
+            }
+        }
 
         let widgetConfig = null;
         let currentService = null;
@@ -680,7 +705,7 @@
             resultDiv.innerHTML = '<div class="spinner"></div>';
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/api-widget/appointment`, {
+                const response = await fetch(`${API_BASE_URL}/api/api-widget/public/appointment?partner=${partnerId}&config=${configId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -718,7 +743,7 @@
             resultDiv.innerHTML = '<div class="spinner"></div>';
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/api-widget/litigation`, {
+                const response = await fetch(`${API_BASE_URL}/api/api-widget/public/litigation?partner=${partnerId}&config=${configId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -753,7 +778,7 @@
             resultDiv.innerHTML = '<div class="spinner"></div>';
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/api-widget/documents`, {
+                const response = await fetch(`${API_BASE_URL}/api/api-widget/public/documents?partner=${partnerId}&config=${configId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -762,9 +787,7 @@
                         documentType: formData.get('documentType'),
                         clientName: formData.get('clientName'),
                         clientEmail: formData.get('clientEmail'),
-                        document: {
-                            context: formData.get('context')
-                        }
+                        description: formData.get('context') // Le controller attend description ou situation à la racine
                     })
                 });
 
@@ -825,7 +848,7 @@
                     requestBody.sessionId = chatSessionId;
                 }
 
-                const response = await fetch(`${API_BASE_URL}/api/api-widget/ai_chat`, {
+                const response = await fetch(`${API_BASE_URL}/api/api-widget/public/ai_chat?partner=${partnerId}&config=${configId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
