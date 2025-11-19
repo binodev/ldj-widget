@@ -55,9 +55,9 @@
         }
 
         .partner-logo {
-            height: 32px;
+            height: var(--logo-height, 48px);
             width: auto;
-            max-width: 150px;
+            max-width: var(--logo-max-width, 200px);
             object-fit: contain;
         }
 
@@ -850,10 +850,16 @@
                     }
                 }
 
-                // Appliquer les personnalisations
+                // Appliquer les personnalisations (sauf langue qui nécessite le DOM)
                 applyCustomizations();
                 
+                // Rendre le widget
                 renderWidget();
+                
+                // Appliquer la langue après le rendu (les éléments doivent exister)
+                if (widgetConfig && widgetConfig.widget && widgetConfig.widget.customizations && widgetConfig.widget.customizations.language) {
+                    applyLanguage(widgetConfig.widget.customizations.language);
+                }
             } catch (error) {
                 console.error('Erreur lors du chargement de la config:', error);
                 showError('Erreur lors du chargement de la configuration du widget.');
@@ -967,7 +973,7 @@
                                 <option value="ZOOM">Visioconférence</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Demander un rendez-vous</button>
+                        <button type="submit" class="btn btn-primary" id="appointmentSubmitBtn">Demander un rendez-vous</button>
                     </form>
                     <div id="appointmentResult"></div>
                 </div>
@@ -1009,7 +1015,7 @@
                             <label class="form-label">Email de l'opposant (optionnel)</label>
                             <input type="email" class="form-input" name="opponentEmail" placeholder="email@exemple.com">
                         </div>
-                        <button type="submit" class="btn btn-primary">Créer le litige amiable</button>
+                        <button type="submit" class="btn btn-primary" id="neojusticeSubmitBtn">Créer le litige amiable</button>
                     </form>
                     <div id="neojusticeResult"></div>
                 </div>
@@ -1045,7 +1051,7 @@
                             <label class="form-label">Contexte / Situation</label>
                             <textarea class="form-textarea" name="context" required placeholder="Décrivez la situation pour générer le document..."></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Générer le document</button>
+                        <button type="submit" class="btn btn-primary" id="documentsSubmitBtn">Générer le document</button>
                     </form>
                     <div id="documentResult"></div>
                 </div>
@@ -1418,19 +1424,35 @@
                     logoElement.src = customizations.partnerLogo;
                     logoElement.alt = customizations.customTitle || 'Logo partenaire';
                     logoElement.style.display = 'block';
+                    
+                    // Appliquer la taille personnalisée du logo si fournie
+                    if (customizations.logoHeight) {
+                        root.style.setProperty('--logo-height', customizations.logoHeight);
+                    }
+                    if (customizations.logoMaxWidth) {
+                        root.style.setProperty('--logo-max-width', customizations.logoMaxWidth);
+                    }
                 }
             }
 
             // Appliquer la couleur du bouton
             if (customizations.buttonColor) {
-                // Valider que c'est une couleur hex valide
-                const hexColor = customizations.buttonColor.match(/^#[0-9A-Fa-f]{6}$/);
+                // Valider que c'est une couleur hex valide (support 3 et 6 caractères)
+                const hexColor = customizations.buttonColor.match(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/);
                 if (hexColor) {
-                    root.style.setProperty('--button-color', customizations.buttonColor);
+                    // Normaliser en 6 caractères si nécessaire
+                    let normalizedColor = customizations.buttonColor;
+                    if (customizations.buttonColor.length === 4) {
+                        normalizedColor = '#' + customizations.buttonColor[1] + customizations.buttonColor[1] +
+                                         customizations.buttonColor[2] + customizations.buttonColor[2] +
+                                         customizations.buttonColor[3] + customizations.buttonColor[3];
+                    }
+                    
+                    root.style.setProperty('--button-color', normalizedColor);
                     
                     // Calculer les couleurs hover et active (assombrir de 10% et 20%)
-                    const hoverColor = adjustBrightness(customizations.buttonColor, -10);
-                    const activeColor = adjustBrightness(customizations.buttonColor, -20);
+                    const hoverColor = adjustBrightness(normalizedColor, -10);
+                    const activeColor = adjustBrightness(normalizedColor, -20);
                     root.style.setProperty('--button-color-hover', hoverColor);
                     root.style.setProperty('--button-color-active', activeColor);
                 }
@@ -1440,6 +1462,120 @@
             if (customizations.theme) {
                 document.body.setAttribute('data-theme', customizations.theme);
             }
+
+            // Appliquer la langue (attribut lang seulement, la traduction sera appliquée après le rendu)
+            if (customizations.language) {
+                document.documentElement.setAttribute('lang', customizations.language);
+                // Note: applyLanguage() sera appelé après renderWidget() pour que les éléments existent
+            }
+        }
+
+        // Fonction pour appliquer les traductions selon la langue
+        function applyLanguage(lang) {
+            const translations = {
+                fr: {
+                    appointment: 'Prise de Rendez-VOUS',
+                    neojustice: 'Litige amiable',
+                    documents: 'Générateur de documents',
+                    ai_chat: 'Chat juridique',
+                    appointmentTitle: 'Demander un rendez-vous',
+                    neojusticeTitle: 'Créer un litige amiable',
+                    documentsTitle: 'Générer un document',
+                    chatTitle: 'Chat juridique',
+                    chatPlaceholder: 'Posez votre question...',
+                    chatSend: 'Envoyer',
+                    submit: 'Soumettre',
+                    loading: 'Chargement...',
+                    error: 'Une erreur est survenue',
+                    success: 'Opération réussie'
+                },
+                en: {
+                    appointment: 'Book Appointment',
+                    neojustice: 'Amicable Dispute',
+                    documents: 'Document Generator',
+                    ai_chat: 'Legal Chat',
+                    appointmentTitle: 'Request an appointment',
+                    neojusticeTitle: 'Create amicable dispute',
+                    documentsTitle: 'Generate document',
+                    chatTitle: 'Legal Chat',
+                    chatPlaceholder: 'Ask your question...',
+                    chatSend: 'Send',
+                    submit: 'Submit',
+                    loading: 'Loading...',
+                    error: 'An error occurred',
+                    success: 'Operation successful'
+                },
+                es: {
+                    appointment: 'Reservar Cita',
+                    neojustice: 'Disputa Amistosa',
+                    documents: 'Generador de Documentos',
+                    ai_chat: 'Chat Legal',
+                    appointmentTitle: 'Solicitar una cita',
+                    neojusticeTitle: 'Crear disputa amistosa',
+                    documentsTitle: 'Generar documento',
+                    chatTitle: 'Chat Legal',
+                    chatPlaceholder: 'Haga su pregunta...',
+                    chatSend: 'Enviar',
+                    submit: 'Enviar',
+                    loading: 'Cargando...',
+                    error: 'Ocurrió un error',
+                    success: 'Operación exitosa'
+                },
+                de: {
+                    appointment: 'Termin Buchen',
+                    neojustice: 'Gütliche Streitigkeit',
+                    documents: 'Dokumentgenerator',
+                    ai_chat: 'Rechtschat',
+                    appointmentTitle: 'Termin anfragen',
+                    neojusticeTitle: 'Gütliche Streitigkeit erstellen',
+                    documentsTitle: 'Dokument generieren',
+                    chatTitle: 'Rechtschat',
+                    chatPlaceholder: 'Stellen Sie Ihre Frage...',
+                    chatSend: 'Senden',
+                    submit: 'Absenden',
+                    loading: 'Laden...',
+                    error: 'Ein Fehler ist aufgetreten',
+                    success: 'Vorgang erfolgreich'
+                }
+            };
+
+            const t = translations[lang] || translations.fr;
+            
+            // Mettre à jour les onglets de services
+            const serviceTabs = document.querySelectorAll('.service-tab');
+            serviceTabs.forEach(tab => {
+                const service = tab.getAttribute('data-service');
+                if (service && t[service]) {
+                    tab.textContent = t[service];
+                }
+            });
+
+            // Mettre à jour les titres de formulaires
+            const appointmentTitle = document.querySelector('#appointmentForm h3');
+            if (appointmentTitle) appointmentTitle.textContent = t.appointmentTitle;
+            
+            const neojusticeTitle = document.querySelector('#neojusticeForm h3');
+            if (neojusticeTitle) neojusticeTitle.textContent = t.neojusticeTitle;
+            
+            const documentsTitle = document.querySelector('#documentsForm h3');
+            if (documentsTitle) documentsTitle.textContent = t.documentsTitle;
+
+            // Mettre à jour les boutons de soumission
+            const appointmentSubmitBtn = document.getElementById('appointmentSubmitBtn');
+            if (appointmentSubmitBtn) appointmentSubmitBtn.textContent = t.appointmentTitle;
+            
+            const neojusticeSubmitBtn = document.getElementById('neojusticeSubmitBtn');
+            if (neojusticeSubmitBtn) neojusticeSubmitBtn.textContent = t.neojusticeTitle;
+            
+            const documentsSubmitBtn = document.getElementById('documentsSubmitBtn');
+            if (documentsSubmitBtn) documentsSubmitBtn.textContent = t.documentsTitle;
+
+            // Mettre à jour le chat
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) chatInput.placeholder = t.chatPlaceholder;
+            
+            const chatSendBtn = document.getElementById('chatSendBtn');
+            if (chatSendBtn) chatSendBtn.title = t.chatSend + ' (Entrée)';
         }
 
         // Fonction pour ajuster la luminosité d'une couleur hex
