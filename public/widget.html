@@ -121,8 +121,8 @@
             font-size: 14px;
             font-weight: 500;
             color: #666;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -3px;
             transition: all 0.3s ease;
             white-space: nowrap;
             position: relative;
@@ -146,11 +146,14 @@
             color: #1D243C;
             border-bottom-color: #1D243C;
             font-weight: 600;
+            background: rgba(29, 36, 60, 0.08);
+            border-bottom-width: 3px;
         }
 
         body[data-theme="dark"] .service-tab.active {
             color: #1BDFD5;
             border-bottom-color: #1BDFD5;
+            background: rgba(27, 223, 213, 0.15);
         }
 
         .service-content {
@@ -251,16 +254,6 @@
             height: auto;
             resize: vertical;
             line-height: 1.5;
-        }
-
-        .form-input:invalid:not(:focus):not(:placeholder-shown),
-        .form-textarea:invalid:not(:focus):not(:placeholder-shown) {
-            border-color: #dc3545;
-        }
-
-        .form-input:valid:not(:placeholder-shown),
-        .form-textarea:valid:not(:placeholder-shown) {
-            border-color: #28a745;
         }
 
         .btn {
