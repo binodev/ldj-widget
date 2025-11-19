@@ -801,7 +801,7 @@
                     configId: configId,
                     theme: theme,
                     // Services par défaut si non spécifiés
-                    enabledServices: ['appointment', 'litigation', 'documents', 'ai_chat']
+                    enabledServices: ['appointment', 'neojustice', 'documents', 'ai_chat']
                 };
 
                 // Appeler un endpoint public pour récupérer la config complète si disponible
@@ -855,19 +855,19 @@
             let contentHTML = '';
 
             if (services.includes('appointment')) {
-                tabsHTML += '<button class="service-tab" data-service="appointment" onclick="switchService(\'appointment\')">📅 Rendez-vous</button>';
+                tabsHTML += '<button class="service-tab" data-service="appointment" onclick="switchService(\'appointment\')">📅 Prise de Rendez-VOUS</button>';
                 contentHTML += renderAppointmentForm();
             }
-            if (services.includes('litigation')) {
-                tabsHTML += '<button class="service-tab" data-service="litigation" onclick="switchService(\'litigation\')">⚖️ Litiges</button>';
-                contentHTML += renderLitigationForm();
+            if (services.includes('neojustice')) {
+                tabsHTML += '<button class="service-tab" data-service="neojustice" onclick="switchService(\'neojustice\')">⚖️ Litige amiable</button>';
+                contentHTML += renderNeoJusticeForm();
             }
             if (services.includes('documents')) {
-                tabsHTML += '<button class="service-tab" data-service="documents" onclick="switchService(\'documents\')">📄 Documents</button>';
+                tabsHTML += '<button class="service-tab" data-service="documents" onclick="switchService(\'documents\')">📄 Générateur de documents</button>';
                 contentHTML += renderDocumentForm();
             }
             if (services.includes('ai_chat')) {
-                tabsHTML += '<button class="service-tab" data-service="ai_chat" onclick="switchService(\'ai_chat\')">💬 Chat IA</button>';
+                tabsHTML += '<button class="service-tab" data-service="ai_chat" onclick="switchService(\'ai_chat\')">💬 Chat juridique</button>';
                 contentHTML += renderChatInterface();
             }
 
@@ -954,12 +954,13 @@
             `;
         }
 
-        // Formulaire de litige
-        function renderLitigationForm() {
+        // Formulaire de litige amiable (NeoJustice)
+        function renderNeoJusticeForm() {
             return `
-                <div class="service-content" id="service-litigation">
-                    <h2 style="margin-bottom: 20px;">Créer un litige</h2>
-                    <form id="litigationForm" onsubmit="handleLitigationSubmit(event)">
+                <div class="service-content" id="service-neojustice">
+                    <h2 style="margin-bottom: 20px;">Créer un litige amiable</h2>
+                    <p style="margin-bottom: 20px; color: #666; font-size: 14px;">Résolvez votre conflit à l'amiable sans procédure judiciaire grâce à NeoJustice.</p>
+                    <form id="neojusticeForm" onsubmit="handleNeoJusticeSubmit(event)">
                         <div class="form-group">
                             <label class="form-label">Votre nom</label>
                             <input type="text" class="form-input" name="claimantName" required>
@@ -969,16 +970,28 @@
                             <input type="email" class="form-input" name="claimantEmail" required>
                         </div>
                         <div class="form-group">
+                            <label class="form-label">Titre du litige</label>
+                            <input type="text" class="form-input" name="title" required placeholder="Ex: Litige avec mon fournisseur">
+                        </div>
+                        <div class="form-group">
                             <label class="form-label">Description du litige</label>
                             <textarea class="form-textarea" name="description" required placeholder="Décrivez votre litige en détail..."></textarea>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Montant réclamé (€)</label>
-                            <input type="number" class="form-input" name="amount" step="0.01" min="0">
+                            <label class="form-label">Montant en jeu (€)</label>
+                            <input type="number" class="form-input" name="amount" step="0.01" min="0" placeholder="Optionnel">
                         </div>
-                        <button type="submit" class="btn btn-primary">Créer le litige</button>
+                        <div class="form-group">
+                            <label class="form-label">Nom de l'opposant (optionnel)</label>
+                            <input type="text" class="form-input" name="opponentName" placeholder="Nom de la personne/entreprise">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email de l'opposant (optionnel)</label>
+                            <input type="email" class="form-input" name="opponentEmail" placeholder="email@exemple.com">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Créer le litige amiable</button>
                     </form>
-                    <div id="litigationResult"></div>
+                    <div id="neojusticeResult"></div>
                 </div>
             `;
         }
@@ -1026,14 +1039,14 @@
             
             return `
                 <div class="service-content active" id="service-ai_chat">
-                    <h2 style="margin-bottom: 20px;">Assistant juridique IA</h2>
+                    <h2 style="margin-bottom: 20px;">Chat juridique</h2>
                     <div class="chat-header-actions">
                         <button class="chat-clear-btn" onclick="clearChatHistory()" title="Effacer la conversation">🗑️ Nouvelle conversation</button>
                     </div>
                     <div class="chat-container">
                         <div class="chat-messages" id="chatMessages">
                             <div class="chat-message assistant">
-                                <p>Bonjour ! Je suis votre assistant juridique. Comment puis-je vous aider aujourd'hui ?</p>
+                                <p>Bonjour ! Je suis votre chat juridique. Comment puis-je vous aider aujourd'hui ?</p>
                             </div>
                         </div>
                         <div class="chat-input-container">
@@ -1058,7 +1071,7 @@
                 if (messagesDiv) {
                     messagesDiv.innerHTML = `
                         <div class="chat-message assistant">
-                            <p>Bonjour ! Je suis votre assistant juridique. Comment puis-je vous aider aujourd'hui ?</p>
+                            <p>Bonjour ! Je suis votre chat juridique. Comment puis-je vous aider aujourd'hui ?</p>
                         </div>
                     `;
                 }
@@ -1117,16 +1130,16 @@
             }
         }
 
-        // Gestionnaire de soumission de litige
-        async function handleLitigationSubmit(event) {
+        // Gestionnaire de soumission de litige amiable (NeoJustice)
+        async function handleNeoJusticeSubmit(event) {
             event.preventDefault();
             const formData = new FormData(event.target);
-            const resultDiv = document.getElementById('litigationResult');
+            const resultDiv = document.getElementById('neojusticeResult');
             
             resultDiv.innerHTML = '<div class="spinner"></div>';
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/api-widget/public/litigation?partner=${partnerId}&config=${configId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/api-widget/public/neojustice?partner=${partnerId}&config=${configId}`, {
                     method: 'POST',
                     mode: 'cors',
                     credentials: 'omit',
@@ -1134,17 +1147,25 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        claimantName: formData.get('claimantName'),
-                        claimantEmail: formData.get('claimantEmail'),
-                        description: formData.get('description'),
-                        amount: parseFloat(formData.get('amount')) || 0
+                        clientInfo: {
+                            firstname: formData.get('claimantName')?.split(' ')[0] || formData.get('claimantName'),
+                            lastname: formData.get('claimantName')?.split(' ').slice(1).join(' ') || '',
+                            email: formData.get('claimantEmail')
+                        },
+                        claimDetails: {
+                            title: formData.get('title'),
+                            description: formData.get('description'),
+                            amount: parseFloat(formData.get('amount')) || undefined,
+                            opponentName: formData.get('opponentName') || undefined,
+                            opponentEmail: formData.get('opponentEmail') || undefined
+                        }
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    resultDiv.innerHTML = '<div class="success-message">Votre litige a été créé avec succès ! Vous recevrez un suivi par email.</div>';
+                    resultDiv.innerHTML = '<div class="success-message">Votre litige amiable a été créé avec succès via NeoJustice ! Vous recevrez un suivi par email.</div>';
                     event.target.reset();
                 } else {
                     resultDiv.innerHTML = `<div class="error-message">Erreur : ${data.message || 'Une erreur est survenue'}</div>`;
