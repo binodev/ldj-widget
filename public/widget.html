@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         * {
             margin: 0;
@@ -81,6 +82,34 @@
             border-radius: 4px;
             transition: background 0.2s;
         }
+        
+        .widget-close i {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2.5;
+        }
+        
+        .service-tab i {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2;
+            flex-shrink: 0;
+        }
+        
+        .chat-send-btn i {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.5;
+        }
+        
+        .chat-clear-btn i {
+            width: 14px;
+            height: 14px;
+            stroke-width: 2;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
 
         .widget-close:hover {
             background: rgba(255,255,255,0.2);
@@ -139,6 +168,9 @@
             transition: all 0.3s ease;
             white-space: nowrap;
             position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         body[data-theme="dark"] .service-tab {
@@ -560,6 +592,9 @@
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .chat-clear-btn:hover {
@@ -666,7 +701,9 @@
                 <img id="partnerLogo" class="partner-logo" src="" alt="" style="display: none;">
                 <div class="widget-title" id="widgetTitle">Le Devis Juridique</div>
             </div>
-            <button class="widget-close" onclick="closeWidget()" aria-label="Fermer">×</button>
+            <button class="widget-close" onclick="closeWidget()" aria-label="Fermer">
+                <i data-lucide="x"></i>
+            </button>
         </div>
 
         <div class="widget-content" id="widgetContent">
@@ -792,6 +829,11 @@
                                     behavior: 'smooth'
                                 });
                             }, 100);
+                            
+                            // Réinitialiser les icônes après le chargement de l'historique
+                            if (typeof lucide !== 'undefined') {
+                                lucide.createIcons();
+                            }
                         }
                     }
                 }
@@ -881,25 +923,30 @@
             let contentHTML = '';
 
             if (services.includes('appointment')) {
-                tabsHTML += '<button class="service-tab" data-service="appointment" onclick="switchService(\'appointment\')">📅 Prise de Rendez-VOUS</button>';
+                tabsHTML += '<button class="service-tab" data-service="appointment" onclick="switchService(\'appointment\')"><i data-lucide="calendar"></i><span>Prise de Rendez-VOUS</span></button>';
                 contentHTML += renderAppointmentForm();
             }
             if (services.includes('neojustice')) {
-                tabsHTML += '<button class="service-tab" data-service="neojustice" onclick="switchService(\'neojustice\')">⚖️ Litige amiable</button>';
+                tabsHTML += '<button class="service-tab" data-service="neojustice" onclick="switchService(\'neojustice\')"><i data-lucide="scale"></i><span>Litige amiable</span></button>';
                 contentHTML += renderNeoJusticeForm();
             }
             if (services.includes('documents')) {
-                tabsHTML += '<button class="service-tab" data-service="documents" onclick="switchService(\'documents\')">📄 Générateur de documents</button>';
+                tabsHTML += '<button class="service-tab" data-service="documents" onclick="switchService(\'documents\')"><i data-lucide="file-text"></i><span>Générateur de documents</span></button>';
                 contentHTML += renderDocumentForm();
             }
             if (services.includes('ai_chat')) {
-                tabsHTML += '<button class="service-tab" data-service="ai_chat" onclick="switchService(\'ai_chat\')">💬 Chat juridique</button>';
+                tabsHTML += '<button class="service-tab" data-service="ai_chat" onclick="switchService(\'ai_chat\')"><i data-lucide="message-circle"></i><span>Chat juridique</span></button>';
                 contentHTML += renderChatInterface();
             }
 
             tabsHTML += '</div>';
 
             content.innerHTML = tabsHTML + contentHTML;
+            
+            // Initialiser les icônes Lucide après le rendu
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
             
             // Activer le premier service
             if (currentService === null) {
@@ -932,11 +979,20 @@
             if (serviceContent) {
                 serviceContent.classList.add('active');
                 
+                // Réinitialiser les icônes Lucide après le changement de service
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+                
                 // Charger l'historique si on passe au chat IA
                 if (service === 'ai_chat') {
                     // Attendre que le DOM soit prêt
                     setTimeout(() => {
                         loadChatHistory();
+                        // Réinitialiser les icônes après le chargement de l'historique
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
                     }, 100);
                 }
             }
@@ -1067,7 +1123,10 @@
                 <div class="service-content active" id="service-ai_chat">
                     <h2 style="margin-bottom: 20px;">Chat juridique</h2>
                     <div class="chat-header-actions">
-                        <button class="chat-clear-btn" onclick="clearChatHistory()" title="Effacer la conversation">🗑️ Nouvelle conversation</button>
+                        <button class="chat-clear-btn" onclick="clearChatHistory()" title="Effacer la conversation">
+                            <i data-lucide="trash-2"></i>
+                            <span>Nouvelle conversation</span>
+                        </button>
                     </div>
                     <div class="chat-container">
                         <div class="chat-messages" id="chatMessages">
@@ -1077,7 +1136,9 @@
                         </div>
                         <div class="chat-input-container">
                             <textarea class="chat-input" id="chatInput" placeholder="Posez votre question..." rows="1" onkeydown="handleChatKeyPress(event)" oninput="autoResizeChatInput(this)"></textarea>
-                            <button class="btn btn-primary chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()" title="Envoyer (Entrée)">➤</button>
+                            <button class="btn btn-primary chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()" title="Envoyer (Entrée)">
+                                <i data-lucide="send"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1108,6 +1169,11 @@
                     chatSessionId = null;
                 } catch (e) {
                     console.warn('Impossible d\'effacer le localStorage:', e);
+                }
+                
+                // Réinitialiser les icônes après la modification du DOM
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
                 }
             }
         }
@@ -1541,14 +1607,32 @@
 
             const t = translations[lang] || translations.fr;
             
-            // Mettre à jour les onglets de services
+            // Mettre à jour les onglets de services (préserver les icônes)
             const serviceTabs = document.querySelectorAll('.service-tab');
             serviceTabs.forEach(tab => {
                 const service = tab.getAttribute('data-service');
                 if (service && t[service]) {
-                    tab.textContent = t[service];
+                    // Préserver l'icône et mettre à jour uniquement le texte
+                    const icon = tab.querySelector('i');
+                    const span = tab.querySelector('span');
+                    if (span) {
+                        span.textContent = t[service];
+                    } else if (icon) {
+                        // Si pas de span, créer un span pour le texte
+                        const newSpan = document.createElement('span');
+                        newSpan.textContent = t[service];
+                        tab.appendChild(newSpan);
+                    } else {
+                        // Sinon, remplacer tout le contenu mais garder la structure
+                        tab.innerHTML = '<i data-lucide="' + getServiceIcon(service) + '"></i><span>' + t[service] + '</span>';
+                    }
                 }
             });
+            
+            // Réinitialiser les icônes après la mise à jour de la langue
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
 
             // Mettre à jour les titres de formulaires
             const appointmentTitle = document.querySelector('#appointmentForm h3');
@@ -1578,6 +1662,17 @@
             if (chatSendBtn) chatSendBtn.title = t.chatSend + ' (Entrée)';
         }
 
+        // Fonction helper pour obtenir l'icône d'un service
+        function getServiceIcon(service) {
+            const iconMap = {
+                'appointment': 'calendar',
+                'neojustice': 'scale',
+                'documents': 'file-text',
+                'ai_chat': 'message-circle'
+            };
+            return iconMap[service] || 'circle';
+        }
+
         // Fonction pour ajuster la luminosité d'une couleur hex
         function adjustBrightness(hex, percent) {
             // Convertir hex en RGB
@@ -1596,6 +1691,18 @@
                 const hex = x.toString(16);
                 return hex.length === 1 ? '0' + hex : hex;
             }).join('');
+        }
+
+        // Initialiser les icônes Lucide au chargement de la page
+        if (typeof lucide !== 'undefined') {
+            // Attendre que le DOM soit prêt
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    lucide.createIcons();
+                });
+            } else {
+                lucide.createIcons();
+            }
         }
 
         // Charger la configuration au chargement de la page
