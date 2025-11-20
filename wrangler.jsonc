@@ -1,6 +1,6 @@
 {
   // Nom du projet sur Cloudflare Workers / Pages
-  "name": "ldj-widget",
+  "name": "cdn-ldj",
 
   // Date de compatibilité (gardée proche de la date actuelle)
   "compatibility_date": "2025-11-16",
