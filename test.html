@@ -89,11 +89,30 @@
 
     <!-- Initialisation du widget -->
     <script>
+        // Configuration par environnement
+        const environments = {
+            dev: {
+                apiUrl: 'http://localhost:5001',
+                widgetUrl: 'http://localhost:3000'
+            },
+            staging: {
+                apiUrl: 'https://test.api.ledevisjuridique.fr',
+                widgetUrl: 'https://test.app.ledevisjuridique.fr'
+            },
+            production: {
+                apiUrl: 'https://api.ledevisjuridique.fr',
+                widgetUrl: 'https://app.ledevisjuridique.fr'
+            }
+        };
+
+        // Choisir l'environnement (dev par défaut pour les tests locaux)
+        const env = environments.dev;
+
         const widgetConfig = {
             partnerId: '6931b4ba8a8b58ff4e3b3e64',
             configId: '6931b4ba8a8b58ff4e3b3e68',
-            apiUrl: 'http://localhost:5001', // URL de l'API backend
-            widgetUrl: 'http://localhost:3000', // URL du frontend Nuxt
+            apiUrl: env.apiUrl,
+            widgetUrl: env.widgetUrl,
             services: ['ai_chat', 'documents', 'appointment', 'neojustice'],
             theme: {
                 buttonText: 'Assistance juridique',

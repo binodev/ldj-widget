@@ -10,6 +10,7 @@ const LDJWidget = {
     this.config = {
       partnerId: options.partnerId,
       configId: options.configId,
+      // URLs configurables - par défaut production
       apiUrl: options.apiUrl || 'https://api.ledevisjuridique.fr',
       widgetUrl: options.widgetUrl || 'https://app.ledevisjuridique.fr',
       services: options.services || ['ai_chat', 'documents', 'appointment', 'neojustice'],
